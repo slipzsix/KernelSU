@@ -317,27 +317,123 @@ int get_pkg_from_apk_dir_path(char *pkg, const char *path)
 	return 0;
 }
 
-bool is_manager_apk(char *path)
+static enum ksu_manager_type detected_manager = KSU_MANAGER_UNKNOWN;
+
+enum ksu_manager_type ksu_detect_manager_apk(char *path)
 {
 	// dummy.keystore
 	if (check_v2_signature(path, 0x363, "4359c171f32543394cbc23ef908c4bb94cad7c8087002ba164c8230948c21549"))
-		return true;
+		return KSU_MANAGER_XXSU;
 
 	// kernelsu official
 	if (check_v2_signature(path, EXPECTED_SIZE, EXPECTED_HASH))
-		return true;
+		return KSU_MANAGER_XXSU;
 
 	// rifsxd/KernelSU-Next
 	if (check_v2_signature(path, 0x3e6, "79e590113c4c4c0c222978e413a5faa801666957b1212a328e46c00c69821bf7"))
-		return true;
+		return KSU_MANAGER_KSUN;
 
 	// Baka-SU/BakaSU
 	if (check_v2_signature(path, 0x377, "d3469712b6214462764a1d8d3e5cbe1d6819a0b629791b9f4101867821f1df64"))
-		return true;
+		return KSU_MANAGER_BKSU;
 
 	// LyraVoid/FinaSU
 	if (check_v2_signature(path, 0x2cc, "2d89b50aaf1db013c2b6738f973f48b62ea21a3a8d7216bfec3521065d448458"))
-		return true;
+		return KSU_MANAGER_FINASU;
 
-	return false;
+	return KSU_MANAGER_UNKNOWN;
+}
+
+#include "../include/ksu.h"
+
+#ifndef KSU_KSUN_VERSION
+#define KSU_KSUN_VERSION KSU_VERSION
+#endif
+#ifndef KSU_VERSION_FULL
+#define KSU_VERSION_FULL KSU_VERSION_TAG
+#endif
+#ifndef KSU_KSUN_TAG
+#define KSU_KSUN_TAG KSU_VERSION_TAG
+#endif
+#ifndef KSU_KSUN_VERSION_FULL
+#define KSU_KSUN_VERSION_FULL KSU_VERSION_FULL
+#endif
+#ifndef KSU_BKSU_VERSION
+#define KSU_BKSU_VERSION KSU_VERSION
+#endif
+#ifndef KSU_BKSU_TAG
+#define KSU_BKSU_TAG KSU_VERSION_TAG
+#endif
+#ifndef KSU_BKSU_VERSION_FULL
+#define KSU_BKSU_VERSION_FULL KSU_VERSION_FULL
+#endif
+#ifndef KSU_FINASU_VERSION
+#define KSU_FINASU_VERSION KSU_VERSION
+#endif
+#ifndef KSU_FINASU_TAG
+#define KSU_FINASU_TAG KSU_VERSION_TAG
+#endif
+#ifndef KSU_FINASU_VERSION_FULL
+#define KSU_FINASU_VERSION_FULL KSU_VERSION_FULL
+#endif
+
+void ksu_set_manager_type(enum ksu_manager_type type)
+{
+	WRITE_ONCE(detected_manager, type);
+}
+
+u32 ksu_get_manager_version(void)
+{
+	switch (READ_ONCE(detected_manager)) {
+	case KSU_MANAGER_KSUN:
+		return KSU_KSUN_VERSION;
+	case KSU_MANAGER_BKSU:
+		return KSU_BKSU_VERSION;
+	case KSU_MANAGER_FINASU:
+		return KSU_FINASU_VERSION;
+	case KSU_MANAGER_XXSU:
+	default:
+		return KERNEL_SU_VERSION;
+	}
+}
+
+const char *ksu_get_manager_version_tag(void)
+{
+	switch (READ_ONCE(detected_manager)) {
+	case KSU_MANAGER_KSUN:
+		return KSU_KSUN_TAG;
+	case KSU_MANAGER_BKSU:
+		return KSU_BKSU_TAG;
+	case KSU_MANAGER_FINASU:
+		return KSU_FINASU_TAG;
+	case KSU_MANAGER_XXSU:
+	default:
+		return KERNEL_SU_VERSION_TAG;
+	}
+}
+
+const char *ksu_get_manager_version_full(void)
+{
+	switch (READ_ONCE(detected_manager)) {
+	case KSU_MANAGER_KSUN:
+		return KSU_KSUN_VERSION_FULL;
+	case KSU_MANAGER_BKSU:
+		return KSU_BKSU_VERSION_FULL;
+	case KSU_MANAGER_FINASU:
+		return KSU_FINASU_VERSION_FULL;
+	case KSU_MANAGER_XXSU:
+	default:
+		return KSU_VERSION_FULL;
+	}
+}
+
+bool is_manager_apk(char *path)
+{
+	enum ksu_manager_type type = ksu_detect_manager_apk(path);
+
+	if (type == KSU_MANAGER_UNKNOWN)
+		return false;
+
+	ksu_set_manager_type(type);
+	return true;
 }

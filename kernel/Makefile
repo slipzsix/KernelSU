@@ -13,7 +13,52 @@ $(info -- KDIR: $(KDIR))
 $(info -- MDIR: $(MDIR))
 
 # compliant to last upstream kernel change as of 019a3c0
-CFLAGS_ksu.o += -DKSU_VERSION=32717
+KSU_VERSION := 32717
+KSU_VERSION_TAG := v3.3.1
+KSU_VERSION_FULL := $(KSU_VERSION_TAG)-$(KSU_VERSION)
+
+KSU_KSUN_OFFSET := 748
+KSU_BKSU_OFFSET := 2540
+KSU_FINASU_OFFSET := 450
+
+# KernelSU-Next (rifsxd/KernelSU-Next v3.4.2)
+KSU_KSUN_VERSION := $(shell echo $$(($(KSU_VERSION) + $(KSU_KSUN_OFFSET))))
+KSU_KSUN_TAG := v3.4.2
+KSU_KSUN_VERSION_FULL := $(KSU_KSUN_TAG)-$(KSU_KSUN_VERSION)
+
+# BakaSU / ReSukiSU (Baka-SU/BakaSU v4.2.0-rc3)
+KSU_BKSU_VERSION := $(shell echo $$(($(KSU_VERSION) + $(KSU_BKSU_OFFSET))))
+KSU_BKSU_TAG := v4.2.0
+KSU_BKSU_VERSION_FULL := $(KSU_BKSU_TAG)-$(KSU_BKSU_VERSION)@BakaSU
+
+# FinaSU (LyraVoid/FinaSU v1.4.3)
+KSU_FINASU_VERSION := $(shell echo $$(($(KSU_VERSION) + $(KSU_FINASU_OFFSET))))
+KSU_FINASU_TAG := v1.4.3
+KSU_FINASU_VERSION_FULL := $(KSU_FINASU_TAG)-$(KSU_FINASU_VERSION)
+
+CFLAGS_ksu.o += -DKSU_VERSION=$(KSU_VERSION) \
+    -DKSU_VERSION_TAG=\"$(KSU_VERSION_TAG)\" \
+    -DKSU_VERSION_FULL=\"$(KSU_VERSION_FULL)\" \
+    -DKSU_KSUN_VERSION=$(KSU_KSUN_VERSION) \
+    -DKSU_KSUN_TAG=\"$(KSU_KSUN_TAG)\" \
+    -DKSU_KSUN_VERSION_FULL=\"$(KSU_KSUN_VERSION_FULL)\" \
+    -DKSU_BKSU_VERSION=$(KSU_BKSU_VERSION) \
+    -DKSU_BKSU_TAG=\"$(KSU_BKSU_TAG)\" \
+    -DKSU_BKSU_VERSION_FULL=\"$(KSU_BKSU_VERSION_FULL)\" \
+    -DKSU_FINASU_VERSION=$(KSU_FINASU_VERSION) \
+    -DKSU_FINASU_TAG=\"$(KSU_FINASU_TAG)\" \
+    -DKSU_FINASU_VERSION_FULL=\"$(KSU_FINASU_VERSION_FULL)\"
+
+$(info -- KernelSU tag: $(KSU_VERSION_TAG))
+$(info -- KernelSU version: $(KSU_VERSION))
+$(info -- KernelSU full version: $(KSU_VERSION_FULL))
+$(info -- KernelSU-Next tag: $(KSU_KSUN_TAG))
+$(info -- KernelSU-Next version: $(KSU_KSUN_VERSION))
+$(info -- KernelSU-Next full version: $(KSU_KSUN_VERSION_FULL))
+$(info -- BakaSU tag: $(KSU_BKSU_TAG))
+$(info -- BakaSU version: $(KSU_BKSU_VERSION))
+$(info -- FinaSU tag: $(KSU_FINASU_TAG))
+$(info -- FinaSU version: $(KSU_FINASU_VERSION))
 
 KSU_PACKAGE_NAME := me.weishu.kernelsu
 KSU_EXPECTED_SIZE := 0x033b
