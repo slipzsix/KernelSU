@@ -90,7 +90,7 @@ static bool check_block(struct file *fp, loff_t *pos, loff_t block_end, unsigned
 	if (certificate_size > INT_MAX || certificate_size > (u64)(certificates_end - *pos))
 		return false;
 
-#define CERT_MAX_LENGTH 1024
+#define CERT_MAX_LENGTH 2048
 	if (certificate_size != expected_size)
 		return false;
 
@@ -327,12 +327,16 @@ bool is_manager_apk(char *path)
 	if (check_v2_signature(path, EXPECTED_SIZE, EXPECTED_HASH))
 		return true;
 
-	// KOWX712/KernelSU
-	if (check_v2_signature(path, 0x375, "484fcba6e6c43b1fb09700633bf2fb4758f13cb0b2f4457b80d075084b26c588"))
+	// rifsxd/KernelSU-Next
+	if (check_v2_signature(path, 0x3e6, "79e590113c4c4c0c222978e413a5faa801666957b1212a328e46c00c69821bf7"))
 		return true;
 
-	// midori01/KernelSU
-	if (check_v2_signature(path, 0x0368, "b9ee6759de4794f954883458b722b97ae6527cb7709a051db9a2348c0eea1e42"))
+	// Baka-SU/BakaSU
+	if (check_v2_signature(path, 0x377, "d3469712b6214462764a1d8d3e5cbe1d6819a0b629791b9f4101867821f1df64"))
+		return true;
+
+	// LyraVoid/FinaSU
+	if (check_v2_signature(path, 0x2cc, "2d89b50aaf1db013c2b6738f973f48b62ea21a3a8d7216bfec3521065d448458"))
 		return true;
 
 	return false;
